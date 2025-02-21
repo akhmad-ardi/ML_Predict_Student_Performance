@@ -61,7 +61,6 @@ def run_fn(fn_args: FnArgs):
     train_dataset = input_fn(fn_args.train_files, tf_transform_output, 10)
     eval_dataset = input_fn(fn_args.eval_files, tf_transform_output, 10)
 
-    print(train_dataset.element_spec)
     # Callback untuk menyimpan model terbaik
     model_checkpoint = tf.keras.callbacks.ModelCheckpoint(
         fn_args.serving_model_dir,
