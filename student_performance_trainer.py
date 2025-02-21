@@ -36,26 +36,44 @@ def input_fn(file_pattern, tf_transform_output, num_epochs, batch_size=32) -> tf
 
     return dataset
 
-def build_model():
-    """Membangun model Keras."""
-    inputs = {key: tf.keras.layers.Input(shape=(1,), name=key) for key in FEATURE_KEYS}
-    x = tf.keras.layers.Concatenate()(list(inputs.values()))
-    x = tf.keras.layers.Dense(32, activation='relu')(x)
-    x = tf.keras.layers.Dense(16, activation='relu')(x)
-    outputs = tf.keras.layers.Dense(1, activation='linear')(x)
+def build_model(hp, tf_transform_output):
+    """Membangun model dengan hyperparameters dari Tuner."""
+
+    feature_spec = tf_transform_output.transformed_feature_spec().copy()
+
+    inputs = {feature: tf.keras.layers.Input(shape=(1,), name=feature) for feature in feature_spec.keys() if feature != LABEL_KEY}
+    concatenated = tf.keras.layers.Concatenate()(list(inputs.values()))  # Gabungkan semua fitur
+
+    x = concatenated
+    for i in range(hp["num_layers"]):
+        x = tf.keras.layers.Dense(
+            units=hp[f"units_{i}"],
+            activation="relu"
+        )(x)
+
+    outputs = tf.keras.layers.Dense(1, activation="linear")(x)
 
     model = tf.keras.Model(inputs=inputs, outputs=outputs)
-    model.compile(optimizer='adam', loss='mse', metrics=['mae'])
 
+    # Hyperparameter: Learning rate
+    model.compile(
+        optimizer=tf.keras.optimizers.Adam(
+            learning_rate=hp["learning_rate"]
+        ),
+        loss="mse",
+        metrics=["mae"]
+    )
+    
     return model
-
+    
 def run_fn(fn_args: FnArgs):
     """Fungsi utama Trainer untuk melatih model."""
     
-    # Membangun model
-    model = build_model()
 
     tf_transform_output = tft.TFTransformOutput(fn_args.transform_graph_path)
+    
+    # Membangun model
+    model = build_model(fn_args.hyperparameters["values"], tf_transform_output)
 
     # Membaca dataset
     train_dataset = input_fn(fn_args.train_files, tf_transform_output, 10)
