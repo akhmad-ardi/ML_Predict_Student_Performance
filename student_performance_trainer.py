@@ -7,14 +7,6 @@ from tensorflow_metadata.proto.v0 import schema_pb2
 from tfx_bsl.public import tfxio
 from tfx.examples.penguin import penguin_utils_base as base
 
-# Feature keys
-FEATURE_KEYS = [
-    'normalized_attendance',
-    'normalized_sleep_hours',
-    'normalized_socioeconomic_score',
-    'normalized_study_hours'
-]
-
 LABEL_KEY = 'normalized_grades'
 
 def gzip_reader_fn(filenames):
@@ -64,11 +56,13 @@ def build_model(hp, tf_transform_output):
         metrics=["mae"]
     )
     
+    model.summary()
+
     return model
     
 def run_fn(fn_args: FnArgs):
     """Fungsi utama Trainer untuk melatih model."""
-    
+    print(f"Path file artifact{fn_args.transform_graph_path}")
 
     tf_transform_output = tft.TFTransformOutput(fn_args.transform_graph_path)
     

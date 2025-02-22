@@ -15,17 +15,17 @@ def preprocessing_fn(inputs):
     
     outputs = {}
 
-    attendance = inputs['Attendance (%)']
-    outputs['normalized_attendance'] = tft.scale_to_z_score(attendance)
-
-    sleep_hours = inputs['Sleep Hours']
-    outputs['normalized_sleep_hours'] = tft.scale_to_0_1(sleep_hours)
-
     socioeconomic_score = inputs['Socioeconomic Score']
-    outputs['normalized_socioeconomic_score'] = tft.scale_to_0_1(socioeconomic_score)
+    outputs['normalized_socioeconomic_score'] = socioeconomic_score
 
     study_hours = inputs['Study Hours']
     outputs['normalized_study_hours'] = tft.scale_to_0_1(study_hours)
+    
+    sleep_hours = inputs['Sleep Hours']
+    outputs['normalized_sleep_hours'] = tft.scale_to_0_1(sleep_hours)
+
+    attendance = inputs['Attendance (%)']
+    outputs['normalized_attendance'] = tft.scale_to_0_1(attendance)
     
     grades = inputs['Grades']
     outputs['normalized_grades'] = tft.scale_to_0_1(grades)
